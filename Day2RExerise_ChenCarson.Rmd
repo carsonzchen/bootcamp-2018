@@ -1,0 +1,102 @@
+---
+title: "R Day 2"
+author: "Carson Chen"
+date: "9/18/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+here::here("data", "gapminder5.csv")
+
+gapminder <- read.csv(here::here("data", "gapminder5.csv"))
+```
+## Converting factors to characters
+
+```{r}
+gapminder$country <- as.character(gapminder$country)
+gapminder$continent <- as.character(gapminder$continent)
+str(gapminder)
+gapminder$gdp <- gapminder$pop * gapminder$gdpPercap
+```
+
+## Log GDP/Pop with a for loop
+```{r}
+obs <- 1:nrow(gapminder)
+for (i in obs) {
+ gapminder[i, "logGDP"] <- log(gapminder[i, "gdp"])
+ gapminder[i, "logPop"] <- log(gapminder[i, "pop"])
+}
+```
+
+## Log GDPperCap without loops
+use all() to check all entries with the looping results
+```{r}
+gapminder$vec_log_gdpPercap <- log(gapminder$gdpPercap)
+```
+
+## Mean overall life expectancy by continent
+```{r}
+u_continent <- unique(gapminder$continent)
+
+for (i in u_continent) {
+  mean_lcon <- mean(gapminder$lifeExp[gapminder$continent == i], na.rm = T)
+  print(paste0(i, ": ", mean_lcon))
+}
+```
+
+## Has the gaps close over time
+```{r}
+u_year <- unique(gapminder$year)
+u_continent <- unique(gapminder$continent)
+
+for (i in u_continent) {
+  print(paste0(i, ": "))
+  for (j in u_year) {
+    sd_lcon <- sd(gapminder$lifeExp[(gapminder$continent == i) & (gapminder$year == j)], na.rm = T)
+    print(paste0(j, ": ", sd_lcon))
+  }
+}
+```
+
+## SD of Life Expectancy between 1987 and 2002 inclusive using while loop
+```{r}
+i <- 1987
+while ((i <= 2002) & (i >= 1987)) {
+  sd_le <- sd(gapminder$lifeExp[gapminder$year == i], na.rm = T)
+  print(paste0(i, ": ", sd_le))
+  i = i + 5
+  }
+```
+
+## Report mean population for loop and if else
+```{r}
+years <- unique(gapminder$year)
+for (i in years) {
+  if (i < 1987) {
+    print(paste0(i, ": ", "The year is before 1987")} else {
+    mean_le = mean(pop[gapminder$year == i])
+    print(paste0(i, ": ", mean_le)}
+}
+```
+
+## Function
+```{r}
+sum_report <- 
+  function(df, variable) {
+  var <- df[["lifeExp"]][df$continent == variable]
+  min_lf = min(var)
+  max_lf = max(var)
+  cat(variable, ": Minimum", min_lf, "\nMaximum", max_lf)
+  }
+sum_report(gapminder, "Asia")
+```
